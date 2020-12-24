@@ -2,11 +2,18 @@ package com.coderone95.test.service.service;
 
 import com.coderone95.test.service.entity.Answer;
 import com.coderone95.test.service.entity.Question;
+import com.coderone95.test.service.entity.User;
+import com.coderone95.test.service.entity.UserLoginData;
+import com.coderone95.test.service.model.Teams;
 import com.coderone95.test.service.repository.AnswerRepository;
 import com.coderone95.test.service.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.util.Date;
@@ -23,6 +30,12 @@ public class QuestionService {
 
     @Autowired
     private AnswerRepository answerRepository;
+
+    @Autowired
+    private Environment env;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     public Question saveQuestion(Question que) {
 
@@ -166,5 +179,36 @@ public class QuestionService {
 
     public List<Question> getQuestionsByIds(List<Long> ids) {
         return questionRepository.findAllById(ids);
+    }
+
+    public boolean isCorrectAnswer(Long id) {
+        Answer answer = answerRepository.findById(id).get();
+        return answer.getIsCorrect();
+    }
+
+    public void deleteAnswerById(Long id) {
+        answerRepository.deleteById(id);
+    }
+
+    public List<Answer> getAllAnswersByQuestionId(Long questionId) {
+        Question q = questionRepository.findById(questionId).get();
+        List<Answer> answers = answerRepository.findByQuestion(q);
+        return answers;
+    }
+
+    public boolean isUserExistsByLoginId(String loginId) {
+        String path = env.getProperty("user.service.home");
+        ResponseEntity<UserLoginData> responseEntity = restTemplate.getForEntity(path+"/users/get?loginId="+loginId, UserLoginData.class);
+        UserLoginData loginData = responseEntity.getBody();
+        if(loginData != null){
+            System.out.println(loginData.toString());
+            return true;
+        }
+        return  false;
+    }
+
+    public List<Question> getQuestionsByLoginId(String loginId) {
+        List<Question> list = questionRepository.findByCreatedBy(loginId);
+        return list;
     }
 }

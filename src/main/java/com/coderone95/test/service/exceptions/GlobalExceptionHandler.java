@@ -1,7 +1,9 @@
 package com.coderone95.test.service.exceptions;
 
 import com.coderone95.test.service.model.ErrorDetails;
+import com.coderone95.test.service.model.ErrorResponse;
 import com.coderone95.test.service.model.ExceptionDetails;
+import com.coderone95.test.service.model.Status;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +36,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(GenericException.class)
-    public ResponseEntity<ExceptionDetails> genericExceptionForQuestion(GenericException ex, WebRequest req){
-        ExceptionDetails exception = new ExceptionDetails(new Date(),ex.getMessage(), req.getDescription(false));
-        return new ResponseEntity<>(exception, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> genericExceptionForQuestion(GenericException ex, WebRequest req){
+        //ExceptionDetails exception = new ExceptionDetails(new Date(),ex.getMessage(), req.getDescription(false));
+        ErrorResponse err = new ErrorResponse(ex.getMessage(),new Status("ERROR"));
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EmptyAnswersForQuestion.class)

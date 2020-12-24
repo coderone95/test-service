@@ -10,6 +10,7 @@ import com.coderone95.test.service.model.ErrorResponse;
 import com.coderone95.test.service.model.Status;
 import com.coderone95.test.service.model.SuccessResponse;
 import com.coderone95.test.service.service.QuestionService;
+import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,7 +138,16 @@ public class QuestionController {
         return new ResponseEntity<>(questions,HttpStatus.OK);
     }
 
-
+    @GetMapping(value = "/getQuestions")
+    public ResponseEntity<?> getQuestionsCreatedByUser(@RequestParam("loginId") String loginId){
+        List<Question> list = new ArrayList<>();
+        if(questionService.isUserExistsByLoginId(loginId)){
+            list = questionService.getQuestionsByLoginId(loginId);
+        }else{
+            throw new GeneratorException("Invalid login id");
+        }
+        return new ResponseEntity<>(list,HttpStatus.OK);
+    }
 
 
 
